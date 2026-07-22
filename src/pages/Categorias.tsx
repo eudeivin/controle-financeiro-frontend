@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { Categoria } from '../types';
 import { listarCategorias, criarCategoria, deletarCategoria } from '../api/categoriaService';
+import Sidebar from './Sidebar';
 
 function Categorias() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -9,7 +9,6 @@ function Categorias() {
   const [tipo, setTipo] = useState<'RECEITA' | 'DESPESA'>('DESPESA');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
-  const navigate = useNavigate();
 
   const carregar = useCallback(async () => {
     try {
@@ -55,73 +54,98 @@ function Categorias() {
     }
   }
 
+  const receitas = categorias.filter((c) => c.tipo === 'RECEITA');
+  const despesas = categorias.filter((c) => c.tipo === 'DESPESA');
+
   return (
-    <div style={{ maxWidth: 600, margin: '40px auto', padding: 20 }}>
-      <button onClick={() => navigate('/dashboard')} style={{ marginBottom: 20 }}>
-        ← Voltar
-      </button>
+    <div className="flex min-h-screen bg-gray-950">
+      <Sidebar />
 
-      <h1>Minhas Categorias</h1>
+      <div className="flex-1 p-8 max-w-2xl">
+        <h1 className="text-2xl font-semibold text-white mb-6">Categorias</h1>
 
-      <form onSubmit={handleCriar} style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-        <input
-          type="text"
-          placeholder="Nome da categoria"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          style={{ flex: 1, padding: 8 }}
-        />
-        <select
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value as 'RECEITA' | 'DESPESA')}
-          style={{ padding: 8 }}
-        >
-          <option value="DESPESA">Despesa</option>
-          <option value="RECEITA">Receita</option>
-        </select>
-        <button type="submit" style={{ padding: 8 }}>
-          Adicionar
-        </button>
-      </form>
-
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
-
-      {carregando ? (
-        <p>Carregando...</p>
-      ) : categorias.length === 0 ? (
-        <p>Nenhuma categoria cadastrada ainda.</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {categorias.map((cat) => (
-            <li
-              key={cat.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: 10,
-                borderBottom: '1px solid #eee',
-              }}
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6">
+          <p className="text-sm font-medium text-gray-300 mb-3">Nova categoria</p>
+          <form onSubmit={handleCriar} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Nome da categoria"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              className="flex-1 bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-lime-400"
+            />
+            <select
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value as 'RECEITA' | 'DESPESA')}
+              className="bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-lime-400"
             >
-              <span>
-                {cat.nome}{' '}
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: cat.tipo === 'RECEITA' ? 'green' : 'red',
-                    marginLeft: 8,
-                  }}
-                >
-                  {cat.tipo}
-                </span>
-              </span>
-              <button onClick={() => handleExcluir(cat.id)} style={{ color: 'red' }}>
-                Excluir
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+              <option value="DESPESA">Despesa</option>
+              <option value="RECEITA">Receita</option>
+            </select>
+            <button
+              type="submit"
+              className="bg-lime-400 hover:bg-lime-300 text-black px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              Adicionar
+            </button>
+          </form>
+          {erro && <p className="text-red-400 text-sm mt-2">{erro}</p>}
+        </div>
+
+        {carregando ? (
+          <p className="text-gray-500 text-sm">Carregando...</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-800">
+                <h2 className="text-sm font-medium text-green-400">Receitas</h2>
+              </div>
+              {receitas.length === 0 ? (
+                <p className="p-4 text-xs text-gray-600">Nenhuma categoria ainda.</p>
+              ) : (
+                receitas.map((cat) => (
+                  <div
+                    key={cat.id}
+                    className="flex items-center justify-between px-4 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50"
+                  >
+                    <span className="text-sm text-gray-200">{cat.nome}</span>
+                    <button
+                      onClick={() => handleExcluir(cat.id)}
+                      className="text-xs text-gray-500 hover:text-red-400"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-800">
+                <h2 className="text-sm font-medium text-red-400">Despesas</h2>
+              </div>
+              {despesas.length === 0 ? (
+                <p className="p-4 text-xs text-gray-600">Nenhuma categoria ainda.</p>
+              ) : (
+                despesas.map((cat) => (
+                  <div
+                    key={cat.id}
+                    className="flex items-center justify-between px-4 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50"
+                  >
+                    <span className="text-sm text-gray-200">{cat.nome}</span>
+                    <button
+                      onClick={() => handleExcluir(cat.id)}
+                      className="text-xs text-gray-500 hover:text-red-400"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
