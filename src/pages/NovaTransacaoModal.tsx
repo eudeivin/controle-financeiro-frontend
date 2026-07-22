@@ -48,74 +48,78 @@ function NovaTransacaoModal({ onFechar, onSucesso }: Props) {
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div style={{ background: 'white', padding: 30, borderRadius: 8, width: 400 }}>
-        <h2>Nova Transação</h2>
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 10 }}>
-            <label>Tipo</label>
-            <select
-              value={tipo}
-              onChange={(e) => {
-                setTipo(e.target.value as 'RECEITA' | 'DESPESA');
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-sm">
+        <h2 className="text-lg font-semibold text-white mb-5">Nova Transação</h2>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex bg-gray-950 border border-gray-800 rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setTipo('DESPESA');
                 setCategoriaId('');
               }}
-              style={{ width: '100%', padding: 8 }}
+              className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                tipo === 'DESPESA' ? 'bg-red-500/20 text-red-400' : 'text-gray-500'
+              }`}
             >
-              <option value="DESPESA">Despesa</option>
-              <option value="RECEITA">Receita</option>
-            </select>
+              Despesa
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTipo('RECEITA');
+                setCategoriaId('');
+              }}
+              className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                tipo === 'RECEITA' ? 'bg-green-500/20 text-green-400' : 'text-gray-500'
+              }`}
+            >
+              Receita
+            </button>
           </div>
 
-          <div style={{ marginBottom: 10 }}>
-            <label>Descrição</label>
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Descrição</label>
             <input
               type="text"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              style={{ width: '100%', padding: 8 }}
+              className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-lime-400"
+              placeholder="Ex: Mercado"
             />
           </div>
 
-          <div style={{ marginBottom: 10 }}>
-            <label>Valor</label>
-            <input
-              type="number"
-              step="0.01"
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-              style={{ width: '100%', padding: 8 }}
-            />
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-xs text-gray-400 mb-1 block">Valor</label>
+              <input
+                type="number"
+                step="0.01"
+                value={valor}
+                onChange={(e) => setValor(e.target.value)}
+                className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-lime-400"
+                placeholder="0,00"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs text-gray-400 mb-1 block">Data</label>
+              <input
+                type="date"
+                value={data}
+                onChange={(e) => setData(e.target.value)}
+                className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-lime-400"
+              />
+            </div>
           </div>
 
-          <div style={{ marginBottom: 10 }}>
-            <label>Data</label>
-            <input
-              type="date"
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-              style={{ width: '100%', padding: 8 }}
-            />
-          </div>
-
-          <div style={{ marginBottom: 10 }}>
-            <label>Categoria</label>
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Categoria</label>
             <select
               value={categoriaId}
               onChange={(e) => setCategoriaId(e.target.value ? Number(e.target.value) : '')}
-              style={{ width: '100%', padding: 8 }}
+              className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-lime-400"
             >
               <option value="">Selecione...</option>
               {categoriasFiltradas.map((cat) => (
@@ -125,19 +129,26 @@ function NovaTransacaoModal({ onFechar, onSucesso }: Props) {
               ))}
             </select>
             {categoriasFiltradas.length === 0 && (
-              <p style={{ fontSize: 12, color: '#888' }}>
+              <p className="text-xs text-gray-600 mt-1">
                 Nenhuma categoria de {tipo.toLowerCase()} cadastrada ainda.
               </p>
             )}
           </div>
 
-          {erro && <p style={{ color: 'red' }}>{erro}</p>}
+          {erro && <p className="text-red-400 text-sm">{erro}</p>}
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-            <button type="button" onClick={onFechar} style={{ flex: 1, padding: 10 }}>
+          <div className="flex gap-3 mt-2">
+            <button
+              type="button"
+              onClick={onFechar}
+              className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            >
               Cancelar
             </button>
-            <button type="submit" style={{ flex: 1, padding: 10 }}>
+            <button
+              type="submit"
+              className="flex-1 bg-lime-400 hover:bg-lime-300 text-black py-2.5 rounded-lg text-sm font-medium transition-colors"
+            >
               Salvar
             </button>
           </div>
