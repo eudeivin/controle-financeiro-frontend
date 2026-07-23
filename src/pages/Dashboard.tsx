@@ -72,39 +72,39 @@ function Dashboard() {
     : null;
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-950">
       <Sidebar />
 
-      <div className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-6">
+      <div className="flex-1 p-4 md:p-8">
+        <div className="flex justify-between items-center mb-6 gap-2">
           <div>
             <p className="text-sm text-gray-500">Olá,</p>
-            <h1 className="text-2xl font-semibold text-white">{nome}</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-white">{nome}</h1>
           </div>
           <button
             onClick={() => setModalAberto(true)}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors whitespace-nowrap"
           >
             + Nova Transação
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 flex flex-col gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 flex flex-col gap-6">
             {resumo && (
-              <div className="bg-gray-900 border border-gray-800 text-white rounded-2xl p-6 flex items-center justify-between">
+              <div className="bg-gray-900 border border-gray-800 text-white rounded-2xl p-5 md:p-6 flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Saldo atual</p>
-                  <p className="text-3xl font-semibold mb-4">
+                  <p className="text-2xl md:text-3xl font-semibold mb-4">
                     R$ {resumo.saldo.toFixed(2)}
                   </p>
-                  <div className="flex gap-6 text-sm">
+                  <div className="flex gap-4 md:gap-6 text-xs md:text-sm">
                     <span className="text-green-400">↑ R$ {resumo.totalReceitas.toFixed(2)}</span>
                     <span className="text-red-400">↓ R$ {resumo.totalDespesas.toFixed(2)}</span>
                   </div>
                 </div>
 
-                <div className="w-32 h-16">
+                <div className="w-20 h-14 md:w-32 md:h-16 flex-shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                       data={[
@@ -129,7 +129,7 @@ function Dashboard() {
             )}
 
             {resumo && gastosPorCategoria.length > 0 && (
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex gap-6 items-center">
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col sm:flex-row gap-6 items-center">
                 <div className="relative w-28 h-28 flex-shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -160,7 +160,7 @@ function Dashboard() {
                   </div>
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <p className="text-sm font-medium text-gray-300 mb-3">Gastos por categoria</p>
                   <div className="flex flex-col gap-3">
                     {gastosPorCategoria.map((g) => (
@@ -183,7 +183,7 @@ function Dashboard() {
             )}
 
             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-800">
+              <div className="px-4 md:px-5 py-4 border-b border-gray-800">
                 <h2 className="font-medium text-white">Transações recentes</h2>
               </div>
 
@@ -194,11 +194,11 @@ function Dashboard() {
                   {transacoes.map((t) => (
                     <div
                       key={t.id}
-                      className="flex items-center justify-between px-5 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50 group"
+                      className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50 group gap-2"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
                             t.tipo === "RECEITA" ? "bg-green-500/15" : "bg-red-500/15"
                           }`}
                         >
@@ -208,18 +208,18 @@ function Dashboard() {
                             <ArrowDownRight size={16} className="text-red-400" />
                           )}
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-200">{t.descricao}</p>
-                          <p className="text-xs text-gray-500">{t.categoriaNome} · {t.data}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm text-gray-200 truncate">{t.descricao}</p>
+                          <p className="text-xs text-gray-500 truncate">{t.categoriaNome} · {t.data}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-sm font-medium ${t.tipo === "RECEITA" ? "text-green-400" : "text-red-400"}`}>
+                      <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+                        <span className={`text-xs md:text-sm font-medium whitespace-nowrap ${t.tipo === "RECEITA" ? "text-green-400" : "text-red-400"}`}>
                           {t.tipo === "RECEITA" ? "+" : "-"} R$ {t.valor.toFixed(2)}
                         </span>
                         <button
                           onClick={() => handleExcluirTransacao(t.id)}
-                          className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-gray-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -231,10 +231,10 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="col-span-1 flex flex-col gap-6">
+          <div className="lg:col-span-1 flex flex-col gap-6">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
               <p className="text-sm font-medium text-gray-300 mb-4">Resumo rápido</p>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-row lg:flex-col gap-4 justify-between lg:justify-start">
                 <div>
                   <p className="text-xs text-gray-500">Transações no mês</p>
                   <p className="text-xl font-semibold text-white">{transacoes.length}</p>

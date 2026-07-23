@@ -48,8 +48,8 @@ function NovaTransacaoModal({ onFechar, onSucesso }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-sm">
+    <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50">
+      <div className="bg-gray-900 border border-gray-800 sm:rounded-2xl rounded-t-2xl p-6 w-full sm:max-w-sm max-h-[90vh] overflow-y-auto">
         <h2 className="text-lg font-semibold text-white mb-5">Nova Transação</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -91,7 +91,7 @@ function NovaTransacaoModal({ onFechar, onSucesso }: Props) {
             />
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <label className="text-xs text-gray-400 mb-1 block">Valor</label>
               <input
