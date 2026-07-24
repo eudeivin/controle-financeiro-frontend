@@ -20,3 +20,8 @@ export async function criarTransacao(dados: {
 export async function deletarTransacao(id: number): Promise<void> {
   await api.delete(`/transacoes/${id}`);
 }
+
+export async function listarTransacoesPorPeriodo(ano: number, mes: number): Promise<Transacao[]> {
+  const response = await api.get<Transacao[]>(`/transacoes/periodo?ano=${ano}&mes=${mes}`);
+  return response.data;
+}
