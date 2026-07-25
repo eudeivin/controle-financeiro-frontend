@@ -5,7 +5,7 @@ import NovaTransacaoModal from './NovaTransacaoModal';
 import { deletarTransacao, listarTransacoesPorPeriodo } from '../api/transacaoService';
 import Sidebar from './Sidebar';
 import { LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
 import { getIconePorCategoria } from './categoriaIcones';
 
 interface GastoPorCategoria {
@@ -28,6 +28,7 @@ function Dashboard() {
   const [gastosPorCategoria, setGastosPorCategoria] = useState<GastoPorCategoria[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
+  const [transacaoEditando, setTransacaoEditando] = useState<Transacao | null>(null);
 
   const nome = localStorage.getItem("nome");
 
@@ -83,6 +84,21 @@ function Dashboard() {
     }
   }
 
+  function abrirNovaTransacao() {
+    setTransacaoEditando(null);
+    setModalAberto(true);
+  }
+
+  function abrirEdicaoTransacao(t: Transacao) {
+    setTransacaoEditando(t);
+    setModalAberto(true);
+  }
+
+  function fecharModal() {
+    setModalAberto(false);
+    setTransacaoEditando(null);
+  }
+
   const maiorGasto = gastosPorCategoria.length > 0
     ? Math.max(...gastosPorCategoria.map((g) => g.total))
     : 0;
@@ -103,7 +119,7 @@ function Dashboard() {
             <h1 className="text-xl md:text-2xl font-semibold text-white">{nome}</h1>
           </div>
           <button
-            onClick={() => setModalAberto(true)}
+            onClick={abrirNovaTransacao}
             className="bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors whitespace-nowrap"
           >
             + Nova Transação
@@ -234,7 +250,10 @@ function Dashboard() {
                           key={t.id}
                           className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50 group gap-2"
                         >
-                          <div className="flex items-center gap-3 min-w-0">
+                          <button
+                            onClick={() => abrirEdicaoTransacao(t)}
+                            className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                          >
                             <div className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-800">
                               <Icon size={16} className={cor} />
                             </div>
@@ -242,11 +261,17 @@ function Dashboard() {
                               <p className="text-sm text-gray-200 truncate">{t.descricao}</p>
                               <p className="text-xs text-gray-500 truncate">{t.categoriaNome} · {t.data}</p>
                             </div>
-                          </div>
+                          </button>
                           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
                             <span className={`text-xs md:text-sm font-medium whitespace-nowrap ${t.tipo === "RECEITA" ? "text-green-400" : "text-red-400"}`}>
                               {t.tipo === "RECEITA" ? "+" : "-"} R$ {t.valor.toFixed(2)}
                             </span>
+                            <button
+                              onClick={() => abrirEdicaoTransacao(t)}
+                              className="text-gray-600 hover:text-lime-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                            >
+                              <Pencil size={14} />
+                            </button>
                             <button
                               onClick={() => handleExcluirTransacao(t.id)}
                               className="text-gray-600 hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
@@ -287,7 +312,7 @@ function Dashboard() {
               <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
                 <p className="text-sm font-medium text-gray-300 mb-3">Dica</p>
                 <p className="text-xs text-gray-500 leading-relaxed">
-                  Cadastre suas categorias antes de lançar transações para manter tudo organizado por tipo de gasto.
+                  Clique em uma transação para editá-la rapidamente.
                 </p>
               </div>
             </div>
@@ -297,8 +322,9 @@ function Dashboard() {
 
       {modalAberto && (
         <NovaTransacaoModal
-          onFechar={() => setModalAberto(false)}
+          onFechar={fecharModal}
           onSucesso={carregarDados}
+          transacaoParaEditar={transacaoEditando ?? undefined}
         />
       )}
     </div>

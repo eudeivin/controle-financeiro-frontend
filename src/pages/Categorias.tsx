@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Categoria } from '../types';
-import { listarCategorias, criarCategoria, deletarCategoria } from '../api/categoriaService';
+import { listarCategorias, criarCategoria, deletarCategoria, editarCategoria } from '../api/categoriaService';
 import Sidebar from './Sidebar';
+import { Pencil, Check, X } from 'lucide-react';
 
 function Categorias() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -9,6 +10,9 @@ function Categorias() {
   const [tipo, setTipo] = useState<'RECEITA' | 'DESPESA'>('DESPESA');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+
+  const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [nomeEdicao, setNomeEdicao] = useState('');
 
   const carregar = useCallback(async () => {
     try {
@@ -54,8 +58,80 @@ function Categorias() {
     }
   }
 
+  function iniciarEdicao(categoria: Categoria) {
+    setEditandoId(categoria.id);
+    setNomeEdicao(categoria.nome);
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null);
+    setNomeEdicao('');
+  }
+
+  async function salvarEdicao(categoria: Categoria) {
+    if (!nomeEdicao.trim()) return;
+
+    try {
+      await editarCategoria(categoria.id, nomeEdicao, categoria.tipo);
+      setEditandoId(null);
+      carregar();
+    } catch {
+      setErro('Erro ao editar categoria');
+    }
+  }
+
   const receitas = categorias.filter((c) => c.tipo === 'RECEITA');
   const despesas = categorias.filter((c) => c.tipo === 'DESPESA');
+
+  function renderCategoria(cat: Categoria) {
+    const emEdicao = editandoId === cat.id;
+
+    if (emEdicao) {
+      return (
+        <div
+          key={cat.id}
+          className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-800 last:border-0 bg-gray-800/30"
+        >
+          <input
+            type="text"
+            value={nomeEdicao}
+            onChange={(e) => setNomeEdicao(e.target.value)}
+            autoFocus
+            className="flex-1 bg-gray-950 border border-lime-400 rounded-lg px-2 py-1 text-sm text-white focus:outline-none"
+          />
+          <button onClick={() => salvarEdicao(cat)} className="text-lime-400 hover:text-lime-300">
+            <Check size={16} />
+          </button>
+          <button onClick={cancelarEdicao} className="text-gray-500 hover:text-gray-300">
+            <X size={16} />
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={cat.id}
+        className="flex items-center justify-between px-4 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50 group"
+      >
+        <span className="text-sm text-gray-200 truncate">{cat.nome}</span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <button
+            onClick={() => iniciarEdicao(cat)}
+            className="text-gray-600 hover:text-lime-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+          >
+            <Pencil size={14} />
+          </button>
+          <button
+            onClick={() => handleExcluir(cat.id)}
+            className="text-xs text-gray-500 hover:text-red-400"
+          >
+            Excluir
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-950">
@@ -107,20 +183,7 @@ function Categorias() {
                   {receitas.length === 0 ? (
                     <p className="p-4 text-xs text-gray-600">Nenhuma categoria ainda.</p>
                   ) : (
-                    receitas.map((cat) => (
-                      <div
-                        key={cat.id}
-                        className="flex items-center justify-between px-4 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50"
-                      >
-                        <span className="text-sm text-gray-200 truncate">{cat.nome}</span>
-                        <button
-                          onClick={() => handleExcluir(cat.id)}
-                          className="text-xs text-gray-500 hover:text-red-400 flex-shrink-0 ml-2"
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    ))
+                    receitas.map(renderCategoria)
                   )}
                 </div>
 
@@ -131,20 +194,7 @@ function Categorias() {
                   {despesas.length === 0 ? (
                     <p className="p-4 text-xs text-gray-600">Nenhuma categoria ainda.</p>
                   ) : (
-                    despesas.map((cat) => (
-                      <div
-                        key={cat.id}
-                        className="flex items-center justify-between px-4 py-3 border-b border-gray-800 last:border-0 hover:bg-gray-800/50"
-                      >
-                        <span className="text-sm text-gray-200 truncate">{cat.nome}</span>
-                        <button
-                          onClick={() => handleExcluir(cat.id)}
-                          className="text-xs text-gray-500 hover:text-red-400 flex-shrink-0 ml-2"
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    ))
+                    despesas.map(renderCategoria)
                   )}
                 </div>
               </div>

@@ -25,3 +25,14 @@ export async function listarTransacoesPorPeriodo(ano: number, mes: number): Prom
   const response = await api.get<Transacao[]>(`/transacoes/periodo?ano=${ano}&mes=${mes}`);
   return response.data;
 }
+
+export async function editarTransacao(id: number, dados: {
+  descricao: string;
+  valor: number;
+  data: string;
+  tipo: 'RECEITA' | 'DESPESA';
+  categoriaId: number;
+}): Promise<Transacao> {
+  const response = await api.put<Transacao>(`/transacoes/${id}`, dados);
+  return response.data;
+}

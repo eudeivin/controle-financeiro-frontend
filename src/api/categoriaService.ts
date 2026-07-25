@@ -14,3 +14,8 @@ export async function criarCategoria(nome: string, tipo: 'RECEITA' | 'DESPESA'):
 export async function deletarCategoria(id: number): Promise<void> {
   await api.delete(`/categorias/${id}`);
 }
+
+export async function editarCategoria(id: number, nome: string, tipo: 'RECEITA' | 'DESPESA'): Promise<Categoria> {
+  const response = await api.put<Categoria>(`/categorias/${id}`, { nome, tipo });
+  return response.data;
+}

@@ -1,25 +1,34 @@
 import { useEffect, useState } from 'react';
-import type { Categoria } from '../types';
+import type { Categoria, Transacao } from '../types';
 import { listarCategorias } from '../api/categoriaService';
-import { criarTransacao } from '../api/transacaoService';
+import { criarTransacao, editarTransacao } from '../api/transacaoService';
 
 interface Props {
   onFechar: () => void;
   onSucesso: () => void;
+  transacaoParaEditar?: Transacao & { categoriaId?: number };
 }
 
-function NovaTransacaoModal({ onFechar, onSucesso }: Props) {
+function NovaTransacaoModal({ onFechar, onSucesso, transacaoParaEditar }: Props) {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [descricao, setDescricao] = useState('');
-  const [valor, setValor] = useState('');
-  const [data, setData] = useState(new Date().toISOString().split('T')[0]);
-  const [tipo, setTipo] = useState<'RECEITA' | 'DESPESA'>('DESPESA');
-  const [categoriaId, setCategoriaId] = useState<number | ''>('');
+  const [descricao, setDescricao] = useState(transacaoParaEditar?.descricao ?? '');
+  const [valor, setValor] = useState(transacaoParaEditar ? String(transacaoParaEditar.valor) : '');
+  const [data, setData] = useState(transacaoParaEditar?.data ?? new Date().toISOString().split('T')[0]);
+  const [tipo, setTipo] = useState<'RECEITA' | 'DESPESA'>(transacaoParaEditar?.tipo ?? 'DESPESA');
+  const [categoriaId, setCategoriaId] = useState<number | ''>(transacaoParaEditar?.categoriaId ?? '');
   const [erro, setErro] = useState('');
 
+  const editando = !!transacaoParaEditar;
+
   useEffect(() => {
-    listarCategorias().then(setCategorias);
-  }, []);
+    listarCategorias().then((dados) => {
+      setCategorias(dados);
+      if (editando && transacaoParaEditar) {
+        const categoriaAtual = dados.find((c) => c.nome === transacaoParaEditar.categoriaNome);
+        if (categoriaAtual) setCategoriaId(categoriaAtual.id);
+      }
+    });
+  }, [editando, transacaoParaEditar]);
 
   const categoriasFiltradas = categorias.filter((c) => c.tipo === tipo);
 
@@ -33,24 +42,33 @@ function NovaTransacaoModal({ onFechar, onSucesso }: Props) {
     }
 
     try {
-      await criarTransacao({
+      const dados = {
         descricao,
         valor: parseFloat(valor),
         data,
         tipo,
         categoriaId: Number(categoriaId),
-      });
+      };
+
+      if (editando && transacaoParaEditar) {
+        await editarTransacao(transacaoParaEditar.id, dados);
+      } else {
+        await criarTransacao(dados);
+      }
+
       onSucesso();
       onFechar();
     } catch {
-      setErro('Erro ao criar transação');
+      setErro(editando ? 'Erro ao editar transação' : 'Erro ao criar transação');
     }
   }
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50">
       <div className="bg-gray-900 border border-gray-800 sm:rounded-2xl rounded-t-2xl p-6 w-full sm:max-w-sm max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-semibold text-white mb-5">Nova Transação</h2>
+        <h2 className="text-lg font-semibold text-white mb-5">
+          {editando ? 'Editar Transação' : 'Nova Transação'}
+        </h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex bg-gray-950 border border-gray-800 rounded-lg p-1">
@@ -149,7 +167,7 @@ function NovaTransacaoModal({ onFechar, onSucesso }: Props) {
               type="submit"
               className="flex-1 bg-lime-400 hover:bg-lime-300 text-black py-2.5 rounded-lg text-sm font-medium transition-colors"
             >
-              Salvar
+              {editando ? 'Salvar alterações' : 'Salvar'}
             </button>
           </div>
         </form>
