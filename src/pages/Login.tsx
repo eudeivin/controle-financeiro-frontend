@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import api from '../api/api';
 import type { AuthResponse } from '../types';
 import { Wallet } from 'lucide-react';
@@ -19,8 +20,11 @@ function Login() {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('nome', response.data.nome);
       navigate('/dashboard');
-    } catch {
-      setErro('Email ou senha inválidos');
+    } catch (err) {
+      const mensagem = axios.isAxiosError(err)
+        ? err.response?.data?.erro
+        : undefined;
+      setErro(mensagem || 'Email ou senha inválidos');
     }
   }
 
